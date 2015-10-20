@@ -13,6 +13,13 @@ object Application {
   		MyWebSocketActor.props(out)
 	}
 
+
+	import benchmark.akka.actor._
+	import Chameneos._
+
+	Chameneos.start = System.currentTimeMillis
+    current.actorSystem.actorOf(Props(new Mall(1000000, 4)))
+
 }
 
 case object Register

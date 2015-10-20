@@ -28,11 +28,9 @@ class ChatPage extends VueActor {
 
 		vueBehaviour orElse {
 			case StartChat(name) =>
-				println("have to start chat with name "+name)
 				namein ! PoisonPill
 				context.become(chatStarted(name))
 			case any => 
-				println("Chat received "+any)
 		}
 	}
 
@@ -40,10 +38,7 @@ class ChatPage extends VueActor {
 		val namech = context.actorOf(Props(new NameChoosen(name)))
 		val sh = context.actorOf(Props(new SocketHandler(name)))
 
-		vueBehaviour orElse {
-			case any => 
-				println("Chat received "+any)
-		}
+		vueBehaviour orElse {case any => }
 	}
 
 	class NameInput extends VueActor {
@@ -59,10 +54,7 @@ class ChatPage extends VueActor {
 			})
 
 		def operational = {
-			vueBehaviour orElse {
-				case any => 
-					println("Name input received "+any)
-			}
+			vueBehaviour orElse {case any =>}
 		}
 	}
 
@@ -86,7 +78,6 @@ class ChatPage extends VueActor {
     		val from = splitted(0)
     		val txt = splitted(1)
 
-    		println("message"+event.data)
     		self ! AddChatMsg(from, txt)
     	}
     	
