@@ -4,11 +4,11 @@ package eu.unicredit.algos
 import akka.actor._
 import akka.pattern.ask
 
+import scala.concurrent.duration._
+
 object BenchRunner {
 
 	val system = ActorSystem.create("algos")
-
-	import scala.concurrent.duration._
 
 
 	def chameneos() = {
@@ -16,6 +16,7 @@ object BenchRunner {
 
 		import Chameneos._
 		
+
 		system.actorOf(Props(new Actor {
 			val cm = context.actorOf(Props(new ChameneosManager()))
 
@@ -35,6 +36,28 @@ object BenchRunner {
 		})).?("start")(30 seconds)
 	}
 
+	def pingpong() = {
+		var time = 0L
+
+		import PingPong._
+
+		system.actorOf(Props(new Actor {
+			val pm = context.actorOf(Props(new PingPongManager()))		
+
+			def receive = {
+				case "start" =>
+					pm ! Start(10000)
+					context.become(waitEnd(sender))
+			}
+
+			def waitEnd(s: ActorRef): Receive = {
+				case End(t) =>
+					time = t
+					s ! time
+					println("ENDED!! "+time)
+			}
+		})).?("start")(30 seconds)
+	}
 /*		
 		import PingPong._
 
