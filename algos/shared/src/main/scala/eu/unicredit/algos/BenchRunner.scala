@@ -11,7 +11,7 @@ object BenchRunner {
 	val system = ActorSystem.create("algos")
 
 
-	def chameneos() = {
+	def chameneos(n: Int = 100, c: Int = 4) = {
 		var time = 0L
 
 		import Chameneos._
@@ -20,7 +20,7 @@ object BenchRunner {
 		system.actorOf(Props(new Actor {
 			val cm = context.actorOf(Props(new ChameneosManager()))
 
-			cm ! Start(100,4)
+			cm ! Start(n, c)
 
 			def receive = {
 				case "start" =>
@@ -31,12 +31,11 @@ object BenchRunner {
 				case End(t) =>
 					time = t
 					s ! time
-					println("ENDED!! "+time)
 			}
 		})).?("start")(30 seconds)
 	}
 
-	def pingpong() = {
+	def pingpong(n: Long = 1000) = {
 		var time = 0L
 
 		import PingPong._
@@ -46,7 +45,7 @@ object BenchRunner {
 
 			def receive = {
 				case "start" =>
-					pm ! Start(10000)
+					pm ! Start(n)
 					context.become(waitEnd(sender))
 			}
 
@@ -54,22 +53,29 @@ object BenchRunner {
 				case End(t) =>
 					time = t
 					s ! time
-					println("ENDED!! "+time)
 			}
 		})).?("start")(30 seconds)
 	}
-/*		
-		import PingPong._
+
+	def pipe(n: Long = 1000) = {
+		var time = 0L
+
+		import Pipe._
 
 		system.actorOf(Props(new Actor {
-			val pm = context.actorOf(Props(new PingPongManager()))
-
-			pm ! Start(10000)
+			val p = context.actorOf(Props(new PipeManager()))		
 
 			def receive = {
-				case End(time) =>
-					println("ENDED!! "+time)
+				case "start" =>
+					p ! Start(n)
+					context.become(waitEnd(sender))
 			}
-		}))
-*/
+
+			def waitEnd(s: ActorRef): Receive = {
+				case End(t) =>
+					time = t
+					s ! time
+			}
+		})).?("start")(30 seconds)
+	}
 }

@@ -15,12 +15,17 @@ object Main extends js.JSApp {
 
 		BenchRunner.chameneos().onComplete{
 			case Success(time) => println("Chameneos Finished! "+time)
-			case Failure(err) => println("error")
+			case Failure(err) => println("chameneos error")
 		}
 
 		BenchRunner.pingpong().onComplete{
 			case Success(time) => println("PingPong Finished! "+time)
-			case Failure(err) => println("error")
+			case Failure(err) => println("pingpong error")
+		}
+
+		BenchRunner.pipe().onComplete{
+			case Success(time) => println("Pipe Finished! "+time)
+			case Failure(err) => println("pipe error")
 		}
 	}
 

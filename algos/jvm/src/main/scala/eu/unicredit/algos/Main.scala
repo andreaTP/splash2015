@@ -10,12 +10,17 @@ object Main extends App {
 	import BenchRunner.system._
 
 	BenchRunner.chameneos().onComplete{
-		case Success(time) => println("Finished! "+time)
+		case Success(time) => println("Chameneos Finished! "+time)
 		case Failure(err) => println("error")
 	}
 
 	BenchRunner.pingpong().onComplete{
 		case Success(time) => println("PingPong Finished! "+time)
+		case Failure(err) => println("error")
+	}
+
+	BenchRunner.pipe().onComplete{
+		case Success(time) => println("Pipe Finished! "+time)
 		case Failure(err) => println("error")
 	}
 
