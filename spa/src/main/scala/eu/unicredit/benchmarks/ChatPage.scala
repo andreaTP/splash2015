@@ -17,9 +17,14 @@ class ChatPage extends VueActor {
 	import ChatMsgs._
 
 	val vueTemplate =
-		"""	
-			<div>
-			<h1>Chat</h1>
+		"""
+			<div class="col-md-6">
+				<h1>
+					Chat
+					<small>
+						<span class="glyphicon glyphicon-list"></span>
+					</small>
+				</h1>
 			</div>
 		"""
 
@@ -30,7 +35,7 @@ class ChatPage extends VueActor {
 			case StartChat(name) =>
 				namein ! PoisonPill
 				context.become(chatStarted(name))
-			case any => 
+			case any =>
 		}
 	}
 
@@ -43,11 +48,16 @@ class ChatPage extends VueActor {
 
 	class NameInput extends VueActor {
 		val vueTemplate =
-		"""	
-			<input type="text" placeholder="name here" v-model="name" v-on="keyup:nameChoosen | key 'enter'"/>
-		"""
+			"""
+				<div class="input-group">
+					<span class="input-group-addon">
+						<span class="glyphicon glyphicon-user"></span>
+					</span>
+					<input type="text" class="form-control" placeholder="what is your name?" v-model="name" v-on="keyup:nameChoosen | key 'enter'"/>
+				</div>
+			"""
 
-		override val vueMethods = literal( 
+		override val vueMethods = literal(
 			nameChoosen = () => {
 				val str = vue.$get("name").toString
 				context.parent ! StartChat(str)
@@ -60,7 +70,7 @@ class ChatPage extends VueActor {
 
 	class NameChoosen(name: String) extends VueActor {
 		val vueTemplate =
-			"<p>your name is: </p><h3>"+name+"</h3>"
+			s"""<blockquote>$name</blockquote>"""
 
 		def operational = {
 			vueBehaviour orElse { case any =>}
@@ -80,12 +90,12 @@ class ChatPage extends VueActor {
 
     		self ! AddChatMsg(from, txt)
     	}
-    	
+
 		def operational = {
 			val mi = context.actorOf(Props(new MsgInput(name)))
 			val cb = context.actorOf(Props(new ChatBox()))
 
-			vueBehaviour orElse { 
+			vueBehaviour orElse {
 				case acm: AddChatMsg =>
 					cb ! acm
 				case SendChatMsg(from, txt) =>
@@ -97,14 +107,14 @@ class ChatPage extends VueActor {
 
 	class ChatBox(max: Int = 10) extends VueActor {
 		val vueTemplate =
-			"<ul></ul>"
+			"""<ul class="list-group chat"></ul>"""
 
 		def operational = lineCounter(Seq())
 
 		def lineCounter(lines: Seq[ActorRef]): Receive = {
-			vueBehaviour orElse { 
+			vueBehaviour orElse {
 				case AddChatMsg(from, txt) =>
-					val newLines = 
+					val newLines =
 						if (lines.size >= max) {
 							lines.head ! PoisonPill
 							lines.tail
@@ -112,12 +122,15 @@ class ChatPage extends VueActor {
 					val line = context.actorOf(Props(new MsgLine(from, txt)))
 					context.become(lineCounter(newLines :+ line))
 				case any => println("have to add msg")
-			}	
+			}
 		}
 
 		class MsgLine(from: String, txt: String) extends VueActor {
-			val vueTemplate = 
-				s"<li>$from -> $txt</li>"
+			val vueTemplate =
+				s"""<li class="list-group-item">
+					<span class="label label-default">$from</span>
+					$txt
+				</li>"""
 
 			def operational = {
 				vueBehaviour orElse { case any =>}
@@ -127,11 +140,16 @@ class ChatPage extends VueActor {
 
 	class MsgInput(name: String) extends VueActor {
 		val vueTemplate =
-		"""	
-			<input type="text" placeholder="msg here" v-model="msg" v-on="keyup:sendMsg | key 'enter'"/>
-		"""
+			"""
+				<div class="input-group">
+					<span class="input-group-addon">
+						<span class="glyphicon glyphicon-pencil"></span>
+					</span>
+					<input type="text" class="form-control" placeholder="what are you thinking?" v-model="msg" v-on="keyup:sendMsg | key 'enter'"/>
+				</div>
+			"""
 
-		override val vueMethods = literal( 
+		override val vueMethods = literal(
 			sendMsg = () => {
 				val str = vue.$get("msg").toString
 				context.parent ! SendChatMsg(name, str)

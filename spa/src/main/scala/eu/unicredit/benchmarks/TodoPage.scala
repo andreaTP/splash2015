@@ -19,12 +19,12 @@ class TodoPage extends VueActor {
 			<h1>
 				To do
 				<small>
-					<span class="glyphicon glyphicon-pencil"></span>
+					<span class="glyphicon glyphicon-th-list"></span>
 				</small>
 			</h1>
 			<div class="input-group">
 			  <span class="input-group-addon">
-					<span class="glyphicon glyphicon-ok"></span>
+					<span class="glyphicon glyphicon-pushpin"></span>
 				</span>
 				<input type="text" class="form-control" placeholder="what do you want to do?" v-model="newtodo" v-on="keyup:submitTodo | key 'enter'"/>
 			</div>

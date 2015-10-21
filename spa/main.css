@@ -18,3 +18,11 @@
 .right {
   float: right;
 }
+
+.chat {
+  margin-top: 30px;
+}
+
+.chat .label {
+  margin-right: 15px;
+}
