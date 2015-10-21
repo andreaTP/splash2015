@@ -13,8 +13,8 @@ class Page extends VueActor {
 		"""<div class="container"><p class="mini-title">My page container and root</p></div>"""
 
 	def operational = {
-		val menu = context.actorOf(Props(new Menu()), "menu");
-		val pbody = context.actorOf(Props(new PageBody()), "pbody");
+		val menu = context.actorOf(Props(new Menu()), "menu")
+		val pbody = context.actorOf(Props(new PageBody()), "pbody")
 
 		vueBehaviour orElse {
 			case cpa: ChangePageApply =>
@@ -43,7 +43,7 @@ class Menu extends VueActor {
 	override val vueMethods = literal(
 		selectPage = (x: Int) => self ! ChangePageAsk(x))
 
-	def operational = select(3)
+	def operational = select(2)
 
 	def select(page: Int): Receive = {
 		context.parent ! ChangePageApply(page)
@@ -79,25 +79,5 @@ class PageBody extends VueActor {
 					case 3 =>
 						context.actorOf(Props(new ChatPage()))
 				}
-		}
-}
-
-class BenchmarkPage extends VueActor {
-
-	val vueTemplate =
-		"""
-			<div class="col-md-12">
-				<h1>
-					Benchmarks
-					<small>
-						<span class="glyphicon glyphicon-dashboard"></span>
-					</small>
-				</h1>
-			</div>
-		"""
-
-	def operational =
-		vueBehaviour orElse {
-			case any => println(s"Benchmarks Received $any")
 		}
 }
