@@ -17,7 +17,7 @@ class TodoPage extends VueActor {
 		"""
 			<div class="col-md-6">
 			<h1>
-				TODO
+				To do
 				<small>
 					<span class="glyphicon glyphicon-pencil"></span>
 				</small>

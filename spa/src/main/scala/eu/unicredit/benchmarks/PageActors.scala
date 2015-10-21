@@ -43,7 +43,7 @@ class Menu extends VueActor {
 	override val vueMethods = literal(
 		selectPage = (x: Int) => self ! ChangePageAsk(x))
 
-	def operational = select(1)
+	def operational = select(2)
 
 	def select(page: Int): Receive = {
 		context.parent ! ChangePageApply(page)
@@ -86,7 +86,14 @@ class BenchmarkPage extends VueActor {
 
 	val vueTemplate =
 		"""
-			<h1>Benchmarks</h1>
+			<div class="col-md-12">
+				<h1>
+					Benchmarks
+					<small>
+						<span class="glyphicon glyphicon-dashboard"></span>
+					</small>
+				</h1>
+			</div>
 		"""
 
 	def operational =
