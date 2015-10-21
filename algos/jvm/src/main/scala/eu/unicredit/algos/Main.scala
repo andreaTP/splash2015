@@ -1,13 +1,10 @@
 package eu.unicredit.algos
 
-import scala.scalajs.js
-
 import akka.actor._
 
-object Main extends js.JSApp {
+object Main extends App {
 
-	def main() = {
-		println("running on node!")
+		println("running on jvm!")
 
 		val system = ActorSystem.create("algos")
 
@@ -21,7 +18,7 @@ object Main extends js.JSApp {
 			def receive = {
 				case End(time) =>
 					println("ENDED!! "+time)
+					System.exit(0)
 			}
 		}))
-	}
 }

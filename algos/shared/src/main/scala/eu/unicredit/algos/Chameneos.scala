@@ -12,6 +12,25 @@ package eu.unicredit.algos
 import akka.actor._
 
 object Chameneos {
+
+  case class Start(n: Int, numChameneos: Int)
+  case class End(time: Long)
+
+  class ChameneosManager extends Actor {
+
+    def receive = {
+      case Start(n, numChameneos) =>
+        Chameneos.start = System.currentTimeMillis
+        context.actorOf(Props(new Mall(n, numChameneos)))
+        context.become(operative(sender))
+    }
+
+    def operative(answareTo: ActorRef): Receive = {
+      case end: End =>
+        answareTo ! end
+        context.become(receive)
+    }
+  }
   
   sealed trait ChameneosEvent
   case class Meet(from: ActorRef, colour: Colour) extends ChameneosEvent
@@ -93,7 +112,8 @@ object Chameneos {
         sumMeetings += i
         if (numFaded == numChameneos) {
           Chameneos.end = System.currentTimeMillis
-          println("Chameneos ended time is "+(Chameneos.end - Chameneos.start))
+          val time = (Chameneos.end - Chameneos.start)
+          context.parent ! End(time)
           self ! PoisonPill
         }
           

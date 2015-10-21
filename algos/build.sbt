@@ -11,7 +11,8 @@ lazy val algos = crossProject.in(file(".")).
 	name := "algos",
 	organization := "eu.unicredit",
 	version := "0.0.1-SNAPSHOT",
-	scalaVersion := "2.11.7"
+	scalaVersion := "2.11.7",
+  fork in run := true
   ).
   jvmSettings(
   	libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.0"
