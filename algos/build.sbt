@@ -19,7 +19,8 @@ lazy val algos = crossProject.in(file(".")).
   ).
   jsSettings(
   	libraryDependencies += "akka.js" %%% "akkaactor" % "0.2-SNAPSHOT",
-    postLinkJSEnv := NodeJSEnv().value
+    postLinkJSEnv := NodeJSEnv().value,
+    persistLauncher in Compile := true
   )
 
 lazy val algosJVM = algos.jvm

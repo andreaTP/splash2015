@@ -17,7 +17,7 @@ object Splash extends js.JSApp {
 
 		VueActor.insert(() => new Page(), "page")
 
-		
+	/*	
 		//Benchmark
 		import eu.unicredit.algos._
 		import Chameneos._
@@ -29,6 +29,6 @@ object Splash extends js.JSApp {
 			Chameneos.start = System.currentTimeMillis
     		system.actorOf(Props(new Mall(1000/*000*/, 4)))
     	}
-
+	*/
 	}
 }

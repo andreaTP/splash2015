@@ -1,39 +1,40 @@
+
 package eu.unicredit.algos
 
-import scala.scalajs.js
-
-import scala.util.{Success, Failure}
-
 import akka.actor._
+import akka.pattern.ask
 
-object Main extends js.JSApp {
+object BenchRunner {
 
-	def main() = {
-		println("running on node!")
+	val system = ActorSystem.create("algos")
 
-		import BenchRunner.system._
+	import scala.concurrent.duration._
 
-		BenchRunner.chameneos().onComplete{
-			case Success(time) => println("Finished! "+time)
-			case Failure(err) => println("error")
-		}
 
-//		val system = ActorSystem.create("algos")
+	def chameneos() = {
+		var time = 0L
 
-		/*
 		import Chameneos._
-
+		
 		system.actorOf(Props(new Actor {
 			val cm = context.actorOf(Props(new ChameneosManager()))
 
 			cm ! Start(100,4)
 
 			def receive = {
-				case End(time) =>
+				case "start" =>
+					context.become(waitEnd(sender))
+			}
+
+			def waitEnd(s: ActorRef): Receive = {
+				case End(t) =>
+					time = t
+					s ! time
 					println("ENDED!! "+time)
 			}
-		}))
-		*/
+		})).?("start")(30 seconds)
+	}
+
 /*		
 		import PingPong._
 
@@ -48,6 +49,4 @@ object Main extends js.JSApp {
 			}
 		}))
 */
-	}
-
 }

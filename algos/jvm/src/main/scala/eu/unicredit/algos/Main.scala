@@ -1,13 +1,21 @@
 package eu.unicredit.algos
 
 import akka.actor._
+import scala.util.{Success, Failure}
 
 object Main extends App {
 
 		println("running on jvm!")
 
-		val system = ActorSystem.create("algos")
+		import BenchRunner.system._
 
+		BenchRunner.chameneos().onComplete{
+			case Success(time) => println("Finished! "+time)
+			case Failure(err) => println("error")
+		}
+
+/*
+		val system = ActorSystem.create("algos")
 		import Chameneos._
 
 		system.actorOf(Props(new Actor {
@@ -21,4 +29,19 @@ object Main extends App {
 					System.exit(0)
 			}
 		}))
+*/
+/*
+		import PingPong._
+
+		system.actorOf(Props(new Actor {
+			val pm = context.actorOf(Props(new PingPongManager()))
+
+			pm ! Start(10000)
+
+			def receive = {
+				case End(time) =>
+					println("ENDED!! "+time)
+			}
+		}))
+*/
 }
