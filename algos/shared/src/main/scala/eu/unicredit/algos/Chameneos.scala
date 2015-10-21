@@ -3,7 +3,11 @@
    contributed by Julien Gaugaz
    inspired by the version contributed by Yura Taras and modified by Isaac Gouy
 */
-package benchmark.akka.actor
+/*
+	thanks to:
+	https://github.com/jboner/akka-bench
+*/
+package eu.unicredit.algos
 
 import akka.actor._
 

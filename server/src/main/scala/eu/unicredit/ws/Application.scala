@@ -14,7 +14,7 @@ object Application {
 	}
 
 
-	import benchmark.akka.actor._
+	import eu.unicredit.algos._
 	import Chameneos._
 
 	Chameneos.start = System.currentTimeMillis

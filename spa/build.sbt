@@ -11,7 +11,9 @@ enablePlugins(ScalaJSPlugin)
 
 libraryDependencies ++= Seq(
   "akka.js" %%% "akkaactor" % "0.2-SNAPSHOT",
-  "org.scala-js" %%% "scalajs-dom" % "0.8.1"
+  "org.scala-js" %%% "scalajs-dom" % "0.8.1",
+
+  "eu.unicredit" %%% "algos" % "0.0.1-SNAPSHOT"
 )
 
 persistLauncher in Compile := true

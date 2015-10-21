@@ -19,12 +19,16 @@ object Splash extends js.JSApp {
 
 		
 		//Benchmark
-		import benchmark.akka.actor._
+		import eu.unicredit.algos._
 		import Chameneos._
+		import scala.concurrent.duration._
+		import system._
 
-		println("--> starting chameneos")
-		Chameneos.start = System.currentTimeMillis
-    	system.actorOf(Props(new Mall(1000/*000*/, 4)))
+		system.scheduler.scheduleOnce(3 seconds){
+			println("--> starting chameneos")
+			Chameneos.start = System.currentTimeMillis
+    		system.actorOf(Props(new Mall(1000/*000*/, 4)))
+    	}
 
 	}
 }
