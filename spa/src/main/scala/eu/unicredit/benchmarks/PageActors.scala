@@ -34,9 +34,9 @@ class Menu extends VueActor {
 	val vueTemplate =
 		"""
 			<ul class="nav nav-pills">
-				<li v-on='click:selectPage(1)' class="{{c1}}"><a href="#">Page 1</a></li>
-				<li v-on='click:selectPage(2)' class="{{c2}}"><a href="#">Page 2</a></li>
-				<li v-on='click:selectPage(3)' class="{{c3}}"><a href="#">Page 3</a></li>
+				<li v-on='click:selectPage(1)' class="{{c1}}"><a href="#">To do</a></li>
+				<li v-on='click:selectPage(2)' class="{{c2}}"><a href="#">Benchmarks</a></li>
+				<li v-on='click:selectPage(3)' class="{{c3}}"><a href="#">Chat</a></li>
 			</ul>
 		"""
 
