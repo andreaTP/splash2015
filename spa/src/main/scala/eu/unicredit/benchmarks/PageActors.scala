@@ -43,7 +43,7 @@ class Menu extends VueActor {
 	override val vueMethods = literal(
 		selectPage = (x: Int) => self ! ChangePageAsk(x))
 
-	def operational = select(3)
+	def operational = select(1)
 
 	def select(page: Int): Receive = {
 		context.parent ! ChangePageApply(page)
@@ -65,7 +65,7 @@ class PageBody extends VueActor {
 	import MenuMsg._
 
 	val vueTemplate =
-		"""<div><hr /></div>"""
+		"""<div class="row"><hr /></div>"""
 
 	def operational =
 		vueBehaviour orElse {

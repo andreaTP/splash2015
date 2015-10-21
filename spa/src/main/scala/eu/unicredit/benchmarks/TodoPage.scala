@@ -15,10 +15,19 @@ class TodoPage extends VueActor {
 
 	val vueTemplate =
 		"""
-			<div>
-			<h1>TODO</h1>
-			<input type="text" placeholder="what do you want to do?" v-model="newtodo" v-on="keyup:submitTodo | key 'enter'"/>
-			{{newtodo}}
+			<div class="col-md-6">
+			<h1>
+				TODO
+				<small>
+					<span class="glyphicon glyphicon-pencil"></span>
+				</small>
+			</h1>
+			<div class="input-group">
+			  <span class="input-group-addon">
+					<span class="glyphicon glyphicon-ok"></span>
+				</span>
+				<input type="text" class="form-control" placeholder="what do you want to do?" v-model="newtodo" v-on="keyup:submitTodo | key 'enter'"/>
+			</div>
 			</br>
 			<label>Your list:</label>
 			</div>
@@ -27,7 +36,9 @@ class TodoPage extends VueActor {
 	override val vueMethods = literal(
 		submitTodo = () => {
 			val str = vue.$get("newtodo").toString
-			self ! AddItem(str)
+			if (str != "") {
+				self ! AddItem(str)
+			}
 			vue.$set("newtodo", "")
 		})
 
@@ -46,7 +57,7 @@ class TodoPage extends VueActor {
 		import TodoMsgs._
 
 		val vueTemplate =
-			"""<ul></ul>"""
+			"""<ul class="list-group"></ul>"""
 
 		def operational =
 			vueBehaviour orElse {
@@ -59,7 +70,10 @@ class TodoPage extends VueActor {
 		import TodoMsgs._
 
 		val vueTemplate =
-			s"""<li>$txt<button v-on='click:removeItem'>remove</button></li>"""
+			s"""<li class="list-group-item">
+				$txt
+				<span class="glyphicon glyphicon-remove clickable right" v-on='click:removeItem'></span>
+			</li>"""
 
 		override val vueMethods = literal(
 		removeItem = () => {

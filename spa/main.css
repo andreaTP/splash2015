@@ -10,3 +10,11 @@
 	letter-spacing: 1px;
   margin-bottom: 20px;
 }
+
+.clickable {
+  cursor: pointer;
+}
+
+.right {
+  float: right;
+}
