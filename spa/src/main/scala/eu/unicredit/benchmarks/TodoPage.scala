@@ -14,17 +14,17 @@ class TodoPage extends VueActor {
 	import TodoMsgs._
 
 	val vueTemplate =
-		"""	
+		"""
 			<div>
 			<h1>TODO</h1>
-			<input type="text" placeholder="enter here" v-model="newtodo" v-on="keyup:submitTodo | key 'enter'"/>
+			<input type="text" placeholder="what do you want to do?" v-model="newtodo" v-on="keyup:submitTodo | key 'enter'"/>
 			{{newtodo}}
 			</br>
 			<label>Your list:</label>
 			</div>
 		"""
 
-	override val vueMethods = literal( 
+	override val vueMethods = literal(
 		submitTodo = () => {
 			val str = vue.$get("newtodo").toString
 			self ! AddItem(str)
@@ -37,7 +37,7 @@ class TodoPage extends VueActor {
 		vueBehaviour orElse {
 			case ai: AddItem =>
 				tde ! ai
-			case any => 
+			case any =>
 				println("TODO received "+any)
 		}
 	}
@@ -45,10 +45,10 @@ class TodoPage extends VueActor {
 	class TodoElements extends VueActor {
 		import TodoMsgs._
 
-		val vueTemplate = 
+		val vueTemplate =
 			"""<ul></ul>"""
 
-		def operational = 
+		def operational =
 			vueBehaviour orElse {
 				case AddItem(txt) =>
 					context.actorOf(Props(new TodoElement(txt)))
@@ -58,10 +58,10 @@ class TodoPage extends VueActor {
 	class TodoElement(txt: String) extends VueActor {
 		import TodoMsgs._
 
-		val vueTemplate = 
+		val vueTemplate =
 			s"""<li>$txt<button v-on='click:removeItem'>remove</button></li>"""
 
-		override val vueMethods = literal( 
+		override val vueMethods = literal(
 		removeItem = () => {
 			self ! PoisonPill
 		})

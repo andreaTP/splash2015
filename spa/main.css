@@ -1,0 +1,12 @@
+.container {
+  padding-top: 40px;
+}
+
+.mini-title {
+	font-size: 12px;
+	font-weight: 700;
+	color: #959595;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+  margin-bottom: 20px;
+}
