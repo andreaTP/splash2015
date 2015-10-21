@@ -7,14 +7,14 @@ import js.Dynamic.literal
 import akka.actor._
 
 class Page extends VueActor {
-	import MenuMsg._	
+	import MenuMsg._
 
 	val vueTemplate =
-		"""<div><p>My page container and root</p></div>"""
+		"""<div class="container"><p class="mini-title">My page container and root</p></div>"""
 
 	def operational = {
-		val menu = context.actorOf(Props(new Menu()), "menu");
-		val pbody = context.actorOf(Props(new PageBody()), "pbody");
+		val menu = context.actorOf(Props(new Menu()), "menu")
+		val pbody = context.actorOf(Props(new PageBody()), "pbody")
 
 		vueBehaviour orElse {
 			case cpa: ChangePageApply =>
@@ -31,27 +31,28 @@ object MenuMsg {
 class Menu extends VueActor {
 	import MenuMsg._
 
-	val vueTemplate = 
+	val vueTemplate =
 		"""
-			<div>
-				<button v-on='click:selectPage(1)'>Page 1 {{p1}}</button>
-				<button v-on='click:selectPage(2)'>Page 2 {{p2}}</button>
-				<button v-on='click:selectPage(3)'>Page 3 {{p3}}</button>
-			</div>
+			<ul class="nav nav-pills">
+				<li v-on='click:selectPage(1)' class="{{c1}}"><a href="#">To do</a></li>
+				<li v-on='click:selectPage(2)' class="{{c2}}"><a href="#">Benchmarks</a></li>
+				<li v-on='click:selectPage(3)' class="{{c3}}"><a href="#">Chat</a></li>
+			</ul>
 		"""
 
-	override val vueMethods = literal( 
+	override val vueMethods = literal(
 		selectPage = (x: Int) => self ! ChangePageAsk(x))
 
-	def operational = select(3)
+	def operational = select(2)
 
 	def select(page: Int): Receive = {
 		context.parent ! ChangePageApply(page)
 
-		for (i <- 1 to 3)
-			vue.$set(s"p$i", "")
+		for (i <- 1 to 3) {
+			vue.$set(s"c$i", "")
+		}
 
-		vue.$set(s"p$page", "selected")
+		vue.$set(s"c$page", "active")
 
 		vueBehaviour orElse {
 			case ChangePageAsk(p) =>
@@ -61,10 +62,10 @@ class Menu extends VueActor {
 }
 
 class PageBody extends VueActor {
-	import MenuMsg._	
+	import MenuMsg._
 
 	val vueTemplate =
-		"""<div></div>"""
+		"""<div class="row"><hr /></div>"""
 
 	def operational =
 		vueBehaviour orElse {
@@ -73,23 +74,10 @@ class PageBody extends VueActor {
 				p match {
 					case 1 =>
 						context.actorOf(Props(new TodoPage()))
-					case 2 => 
+					case 2 =>
 						context.actorOf(Props(new BenchmarkPage()))
 					case 3 =>
 						context.actorOf(Props(new ChatPage()))
 				}
-		}
-}
-
-class BenchmarkPage extends VueActor {
-
-	val vueTemplate =
-		"""
-			<h1>Benchmarks</h1>
-		"""
-
-	def operational = 
-		vueBehaviour orElse {
-			case any => println(s"Benchmarks Received $any")
 		}
 }
