@@ -12,3 +12,5 @@ postLinkJSEnv := NodeJSEnv().value
 persistLauncher in Compile := true
 
 enablePlugins(ScalaJSPlugin)
+
+//npm install websocket
