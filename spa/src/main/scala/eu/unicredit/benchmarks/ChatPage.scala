@@ -82,8 +82,8 @@ class ChatPage extends VueActor {
 
 		import org.scalajs.dom.raw._
 
-		//val ws = new WebSocket("ws://localhost:9090")
-		val ws = new WebSocket("ws://localhost:9000")
+		val ws = new WebSocket("ws://localhost:9090")
+		//val ws = new WebSocket("ws://localhost:9000")
     	ws.onmessage = { (event: MessageEvent) =>
     		val splitted = event.data.toString.split(",")
     		val from = splitted(0)
