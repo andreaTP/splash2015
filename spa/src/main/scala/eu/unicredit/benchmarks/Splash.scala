@@ -10,11 +10,11 @@ import akka.actor._
 
 object Splash extends js.JSApp {
 
-	def main() = {
-		val system = ActorSystem.create("benchmarks")
+  def main() = {
+    val system = ActorSystem.create("benchmarks")
 
-		VueActor.setSystem(system)
+    VueActor.setSystem(system)
 
-		VueActor.insert(() => new Page(), "page")
-	}
+    VueActor.insert(() => new Page(), "page")
+  }
 }
