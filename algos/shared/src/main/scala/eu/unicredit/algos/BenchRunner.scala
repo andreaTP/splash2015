@@ -32,7 +32,7 @@ object BenchRunner {
 					time = t
 					s ! time
 			}
-		})).?("start")(30 seconds)
+		})).?("start")(60 seconds)
 	}
 
 	def pingpong(n: Long = 1000) = {
@@ -54,7 +54,7 @@ object BenchRunner {
 					time = t
 					s ! time
 			}
-		})).?("start")(30 seconds)
+		})).?("start")(60 seconds)
 	}
 
 	def pipe(n: Long = 1000) = {
@@ -76,6 +76,6 @@ object BenchRunner {
 					time = t
 					s ! time
 			}
-		})).?("start")(30 seconds)
+		})).?("start")(60 seconds)
 	}
 }

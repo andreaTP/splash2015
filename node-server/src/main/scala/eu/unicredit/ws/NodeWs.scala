@@ -6,26 +6,62 @@ import js.Dynamic.{global => g}
 import js.Dynamic.literal
 import js.DynamicImplicits._
 
-object NodeWs {
-/*
-	class WebSocket(params: js.Dynamic) extends js.Object {
+import akka.actor._
 
+object NodeWs {
+
+	val system = ActorSystem("nodeserver")
+
+	val wsManager = system.actorOf(Props(new WsManagerActor()))
+
+	case class RegisterConn(conn: js.Dynamic)
+
+    case class RunBench(name: String)
+    case class BenchResult(name: String, time: String)
+
+	class WsManagerActor extends Actor {
+
+		def receive = {
+			case RegisterConn(c) =>
+				context.actorOf(Props(new ConnectionActor(c)))
+            case msg : String =>
+                val splitted = msg.split(",")
+                if (splitted(0) == "benchmark") {
+                    sender ! RunBench(splitted(1))
+                    println("start benchmark "+splitted(1))
+                } else
+                    context.children.foreach(_ ! msg)
+		}
 	}
-*/
+
+	class ConnectionActor(connection: js.Dynamic) extends Actor {
+
+    	connection.on("message", (message: js.Dynamic) => {
+            context.parent ! message.utf8Data
+    	})
+    
+    	connection.on("close", (reasonCode: js.Dynamic, description: js.Dynamic) => {
+        	self ! PoisonPill
+    	})
+
+    	def receive = {
+            case RunBench(name) =>
+                context.actorOf(Props(new BenchActor(name)))
+            case BenchResult(name, time) =>
+                connection.send(name+","+time)
+    		case msg: String =>
+                connection.send(msg)
+    	}
+	}
 
 	val WebSocketServer = g.require("websocket").server
-	val ws = g.require("websocket").server
-	//val WebSocketServer: js.Object = g.require("websocket").server.asInstanceOf[js.Object]
-
-
+	
 	val http: js.Dynamic = g.require("http")
 
 	val server = http.createServer((request: js.Dynamic, response: js.Dynamic) => {
-			println("Received request for "+request.url)
 			response.writeHead(404)
 			response.end
 	})
-
 
 	val wsServer = js.Dynamic.newInstance(WebSocketServer)(literal(
     	httpServer = server,
@@ -33,12 +69,10 @@ object NodeWs {
 	))
 
 	wsServer.on("request", (request: js.Dynamic) => {
-    	println("received ws request "+request.protocol)
 
-    	val connection = request.accept(false, request.origin)
+    	wsManager ! RegisterConn(request.accept(false, request.origin))
     
-    	println("connection accepted")
-    	
+    /*	
     	connection.on("message", (message: js.Dynamic) => {
         	println("Received message "+message.utf8Data)
             
@@ -49,6 +83,7 @@ object NodeWs {
     	connection.on("close", (reasonCode: js.Dynamic, description: js.Dynamic) => {
         	println(" Peer " + connection.remoteAddress + " disconnected.")
     	})
+    */
 	})
 
 }
