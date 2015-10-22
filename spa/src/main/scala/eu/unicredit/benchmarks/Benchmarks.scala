@@ -1,6 +1,7 @@
 package eu.unicredit.benchmarks
 
 import scala.scalajs.js
+import scala.concurrent.duration._
 import js.Dynamic.literal
 
 import akka.actor._
@@ -21,13 +22,8 @@ class BenchmarkPage extends VueActor {
 		"""
 
 	def operational = {
-    val bench = context.actorOf(Props(new Benchmark()), "benchmark")
-    for (i <- 1 to 20) {
-      bench ! Result(i, i * i)
-    }
-		vueBehaviour orElse {
-			case any => println(s"Benchmarks Received $any")
-		}
+    val bench = context.actorOf(Props(new BenchmarkRunner("Are we fast yet?")), "benchmark")
+		vueBehaviour
   }
 }
 
@@ -35,6 +31,42 @@ case class Result(
   param: Int,
   time: Double
 )
+
+case object StartBenchmark
+
+class BenchmarkRunner(title: String) extends VueActor {
+	val vueTemplate = s"""
+		<div class="row">
+      <h2>$title</h2>
+		</div>
+	"""
+
+	implicit val dispatcher = context.dispatcher
+
+	def operational =  {
+		val button = context.actorOf(Props(new RunButton()))
+		vueBehaviour orElse {
+			case StartBenchmark =>
+				button ! PoisonPill
+				val graph = context.actorOf(Props(new Benchmark()))
+				for (i <- 1 to 20) {
+		      context.system.scheduler.scheduleOnce(i.seconds, graph, Result(i, i * i))
+		    }
+			}
+	}
+}
+
+class RunButton extends VueActor {
+	val vueTemplate =
+		s"""
+			<button type="button" class="btn btn-primary" v-on='click:start()'>Run</button>
+		"""
+
+		override val vueMethods = literal(
+			start = () => context.parent ! StartBenchmark)
+
+		def operational = vueBehaviour
+}
 
 class Benchmark extends VueActor {
   var results = Vector.empty[Result]
@@ -55,24 +87,26 @@ class Benchmark extends VueActor {
 		vueBehaviour orElse {
 			case r: Result =>
         results :+= r
-        val stock = Stock[Result](
-            data = List(results),
-            xaccessor = _.param,
-            yaccessor = _.time,
-            width = 420,
-            height = 360,
-            closed = true
-          )
-				val curve = stock.curves.head
-				val xmin = stock.xscale(0)
-				val xmax = stock.xscale(results.maxBy(_.param).param)
-				val ymin = stock.yscale(0)
-				val ymax = stock.yscale(results.maxBy(_.time).time)
-        vue.$set("line", curve.line.path.print)
-        vue.$set("area", curve.area.path.print)
-				vue.$set("xmin", xmin)
-				vue.$set("xmax", xmax)
-				vue.$set("ymin", ymin)
-				vue.$set("ymax", ymax)
+				if (results.length > 1) {
+	        val stock = Stock[Result](
+	            data = List(results),
+	            xaccessor = _.param,
+	            yaccessor = _.time,
+	            width = 420,
+	            height = 360,
+	            closed = true
+	          )
+					val curve = stock.curves.head
+					val xmin = stock.xscale(0)
+					val xmax = stock.xscale(results.maxBy(_.param).param)
+					val ymin = stock.yscale(0)
+					val ymax = stock.yscale(results.maxBy(_.time).time)
+	        vue.$set("line", curve.line.path.print)
+	        vue.$set("area", curve.area.path.print)
+					vue.$set("xmin", xmin)
+					vue.$set("xmax", xmax)
+					vue.$set("ymin", ymin)
+					vue.$set("ymax", ymax)
+				}
 		}
 }
