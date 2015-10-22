@@ -17,7 +17,6 @@ object NodeWs {
 	case class RegisterConn(conn: js.Dynamic)
 
     case class RunBench(name: String)
-    case class BenchResult(name: String, time: String)
 
 	class WsManagerActor extends Actor {
 

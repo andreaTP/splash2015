@@ -44,6 +44,8 @@ class MyWebSocketBroadcast extends Actor {
 	}
 }
 
+case class BenchResult(name: String, time: String)
+
 class MyWebSocketActor(out: ActorRef) extends Actor {
   import Application._
 
@@ -52,9 +54,15 @@ class MyWebSocketActor(out: ActorRef) extends Actor {
 
   def receive = {
     case msg: String =>
-      broadcast ! msg
+    	val splitted = msg.split(",")
+    	if (splitted(0) == "benchmark")
+    		context.actorOf(Props(new BenchActor(splitted(1))))
+    	else
+      		broadcast ! msg
     case MsgToPage(msg) =>
       out ! msg
+    case BenchResult(name, time) =>
+      out ! name+","+time
   }
 
   override def postStop() =

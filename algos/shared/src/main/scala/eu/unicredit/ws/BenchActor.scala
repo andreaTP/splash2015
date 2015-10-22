@@ -4,6 +4,8 @@ import akka.actor._
 
 import eu.unicredit.algos._
 
+case class BenchResult(name: String, time: String)
+
 class BenchActor(name: String) extends Actor {
 
 	val chamParams = Seq(
@@ -59,7 +61,7 @@ class BenchActor(name: String) extends Actor {
 
 		{
 			case Chameneos.End(time) =>
-				context.parent ! NodeWs.BenchResult(name, time.toString)
+				context.parent ! BenchResult(name, time.toString)
 				context.become(cham(cm, params.tail))
 		}
 	}
@@ -72,7 +74,7 @@ class BenchActor(name: String) extends Actor {
 
 		;{
 			case PingPong.End(time) =>
-				context.parent ! NodeWs.BenchResult(name, time.toString)
+				context.parent ! BenchResult(name, time.toString)
 				context.become(pingpong(pp, params.tail))
 		}
 	}
@@ -85,9 +87,8 @@ class BenchActor(name: String) extends Actor {
 
 		;{
 			case Pipe.End(time) =>
-				context.parent ! NodeWs.BenchResult(name, time.toString)
+				context.parent ! BenchResult(name, time.toString)
 				context.become(pipe(p, params.tail))
 		}
 	}
 }
-
