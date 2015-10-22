@@ -14,102 +14,102 @@ import js.Dynamic.literal
 
 object VueActor {
 
-	case class AddVueChild(v: Vue)
+  case class AddVueChild(v: Vue)
 
-	case object VueChildAdded
+  case object VueChildAdded
 
-	private case class NewVueActor(av: () => VueActor, name: Option[String])
-	
-	val promRoot = Promise[ActorRef]
-	val futRoot = promRoot.future
+  private case class NewVueActor(av: () => VueActor, name: Option[String])
 
-	lazy val root = futRoot.value.get.get
+  val promRoot = Promise[ActorRef]
+  val futRoot = promRoot.future
 
-	def setSystem(as : ActorSystem) =
-		promRoot.success(as.actorOf(Props(VueActor.rootProto()), "root"))
+  lazy val root = futRoot.value.get.get
 
-	def insert(va: () => VueActor, name: String) = {
-		root ! NewVueActor(va, Some(name))
-	}
+  def setSystem(as : ActorSystem) =
+    promRoot.success(as.actorOf(Props(VueActor.rootProto()), "root"))
 
-	def insert(va: () => VueActor, name: Option[String] = None) = {
-		root ! NewVueActor(va, name)
-	}
-		
-	def rootProto = () => 
-		new VueActor {
-			val vueTemplate = ""
-			
-			vue = new Vue(literal(el="#root"))
+  def insert(va: () => VueActor, name: String) = {
+    root ! NewVueActor(va, Some(name))
+  }
 
-			override def preStart() = {}
+  def insert(va: () => VueActor, name: Option[String] = None) = {
+    root ! NewVueActor(va, name)
+  }
 
-			override def receive = 
-				vueBehaviour orElse {
-					case NewVueActor(av, name) =>
-						if (name.isDefined)
-							context.actorOf(Props(av()), name.get)
-						else
-							context.actorOf(Props(av()))
-					case any => println("I'm root and I do not wanna answare anyone "+any)
-				}
+  def rootProto = () =>
+    new VueActor {
+      val vueTemplate = ""
 
-			def operational(): Receive = {case _ =>}
-		}
+      vue = new Vue(literal(el="#root"))
+
+      override def preStart() = {}
+
+      override def receive =
+        vueBehaviour orElse {
+          case NewVueActor(av, name) =>
+            if (name.isDefined)
+              context.actorOf(Props(av()), name.get)
+            else
+              context.actorOf(Props(av()))
+          case any => println("I'm root and I do not wanna answare anyone "+any)
+        }
+
+      def operational(): Receive = {case _ =>}
+    }
 }
 
 trait VueActor extends Actor {
-	me =>
-	import VueActor._
+  me =>
+  import VueActor._
 
-	val vueTemplate: String
+  val vueTemplate: String
 
-	val vueMethods: js.Dynamic = literal()
+  val vueMethods: js.Dynamic = literal()
 
-	def vueBehaviour: Receive = {
-		case AddVueChild(v) =>
+  def vueBehaviour: Receive = {
+    case AddVueChild(v) =>
 
-			val sonName = sender.path.name.replace("$","")
+      val sonName = sender.path.name.replace("$","")
 
-			val child = dom.document.createElement(sonName)
-			
-			vue.$el.appendChild(child)
-			
-			vue.$addChild(v)
+      val child = dom.document.createElement(sonName)
 
-			vue.$compile(vue.$el)
+      vue.$el.appendChild(child)
 
-			sender ! VueChildAdded
-	}
+      vue.$addChild(v)
 
- 	lazy val vueName = self.path.name.replace("$","")
+      vue.$compile(vue.$el)
 
- 	var vue: Vue = null
+      sender ! VueChildAdded
+  }
 
-	val vueProto: () => Vue = () => 
-		Vue.component(vueName, Vue.extend(
-		literal(
-			ready= (((thisVue: Vue) => {
-		  		me.vue = thisVue
-		  	}): js.ThisFunction),
-		  	template=me.vueTemplate,
-		  	methods=me.vueMethods
-		))).asInstanceOf[Vue]
+   lazy val vueName = self.path.name.replace("$","")
 
-	override def preStart() = {
-		context.parent ! AddVueChild(vueProto())
-	}
+   var vue: Vue = null
 
-	override def postStop() = {
-		vue.$destroy(true)
-	}
+  val vueProto: () => Vue = () =>
+    Vue.component(vueName, Vue.extend(
+    literal(
+      ready= (((thisVue: Vue) => {
+          me.vue = thisVue
+        }): js.ThisFunction),
+        template=me.vueTemplate,
+        methods=me.vueMethods
+    ))).asInstanceOf[Vue]
 
-	def receive = {
-		case VueChildAdded =>
-			context.become(operational, true)
-		case any =>
-			self ! any
-	}
+  override def preStart() = {
+    context.parent ! AddVueChild(vueProto())
+  }
 
-	def operational(): Receive
+  override def postStop() = {
+    vue.$destroy(true)
+  }
+
+  def receive = {
+    case VueChildAdded =>
+      context.become(operational, true)
+    case any =>
+      self ! any
+  }
+
+  def operational(): Receive
 }
