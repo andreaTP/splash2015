@@ -68,21 +68,7 @@ object NodeWs {
 	))
 
 	wsServer.on("request", (request: js.Dynamic) => {
-
     	wsManager ! RegisterConn(request.accept(false, request.origin))
-    
-    /*	
-    	connection.on("message", (message: js.Dynamic) => {
-        	println("Received message "+message.utf8Data)
-            
-        	//this loop back
-            connection.send(message.utf8Data)
-    	})
-    
-    	connection.on("close", (reasonCode: js.Dynamic, description: js.Dynamic) => {
-        	println(" Peer " + connection.remoteAddress + " disconnected.")
-    	})
-    */
 	})
 
 }
