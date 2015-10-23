@@ -2,12 +2,15 @@ package eu.unicredit.benchmarks
 
 import scala.scalajs.js
 import scala.concurrent.duration._
+import scala.collection.mutable.Buffer
 import js.Dynamic.literal
 import js.JSConverters._
+import js.annotation.JSExport
 
 import akka.actor._
 
 import eu.unicredit.ws._
+import eu.unicredit.colors._
 
 import paths.high.Stock
 
@@ -66,11 +69,15 @@ case object StartPage
 case object StartNode
 case object StartJvm
 
+@JSExport
 case class GraphResult(
   param: Int,
-  color: String,
+  color: Color,
   time: Int
-)
+) {
+  @JSExport def light = string(lighten(color))
+  @JSExport def dark = string(color)
+}
 
 class BenchmarkBox(name: String) extends VueActor {
   println("Starting bbox ")
@@ -111,7 +118,7 @@ class BenchmarkBox(name: String) extends VueActor {
     self: Actor =>
     val graph: ActorRef
 
-    val color: String
+    val color: Color
 
     var n: Int = 0
 
@@ -151,23 +158,23 @@ class BenchmarkBox(name: String) extends VueActor {
   }
 
   class PageBench(val graph: ActorRef) extends Actor with BenchReceiver {
-    val color = "blue"
+    val color = Color(255, 0, 0)
     context.actorOf(Props(new BenchActor(name)))
   }
 
   class NodeBench(val graph: ActorRef) extends Actor with BenchReceiver with WSBenchReceiver {
-    val color = "red"
+    val color = Color(0, 255, 0)
     val ip = "ws://localhost:9090"
   }
 
   class JvmBench(val graph: ActorRef) extends Actor with BenchReceiver with WSBenchReceiver {
-    val color = "green"
+    val color = Color(120, 129, 194)
     val ip = "ws://localhost:9000"
   }
 }
 
 class Benchmark extends VueActor {
-  var results = Vector.empty[GraphResult]
+  var results = Map.empty[Color, Buffer[GraphResult]]
 
   val vueTemplate = """
       <svg width="600" height="420">
@@ -176,9 +183,13 @@ class Benchmark extends VueActor {
           <line x1="{{xmin}}" y1="{{ymin + 10}}" x2="{{xmin}}" y2="{{ymax - 10}}" stroke="#cccccc" />
           <line v-repeat="vdots" x1="{{xmin}}" y1="{{y}}" x2="{{xmax}}" y2="{{y}}" stroke="#eeeeee" />
 
-          <path d="{{area}}" fill="rgba(120, 129, 194, 0.6)" stroke="none" />
-          <path d="{{line}}" fill="none" stroke="rgb(120, 129, 194)" />
+          <g v-repeat="curves">
+            <text>{{item[0].light()}}</text>
+            <text>{{item[0].dark()}}</text>
 
+            <path d="{{area.path.print()}}" fill="{{item[0].light()}}" stroke="none" />
+            <path d="{{line.path.print()}}" fill="none" stroke="{{item[0].dark()}}" />
+          </g>
           <g v-repeat="dots" transform="translate({{x}}, {{y}})">
             <circle r="2" x="0" y="0" stroke="#cccccc" fill="white" />
             <text transform="translate(-3, 15)">{{param}}</text>
@@ -194,34 +205,36 @@ class Benchmark extends VueActor {
   def operational =
     vueBehaviour orElse {
       case r: GraphResult =>
-        results :+= r
-        if (results.length > 1) {
+        if (results.get(r.color).isEmpty) {
+          results += (r.color -> Buffer())
+        }
+        results(r.color) += r
+        val allResults = results.values.flatten.toSeq
+        if (allResults.length > 1) {
           val stock = Stock[GraphResult](
-              data = List(results),
+              data = results.values.toSeq,
               xaccessor = _.param,
               yaccessor = _.time,
               width = 420,
               height = 360,
               closed = true
             )
-          val curve = stock.curves.head
-          val timeMin = results.minBy(_.time).time
-          val timeMax = results.maxBy(_.time).time
+          val timeMin = allResults.minBy(_.time).time
+          val timeMax = allResults.maxBy(_.time).time
           val xmin = stock.xscale(0)
-          val xmax = stock.xscale(results.maxBy(_.param).param)
+          val xmax = stock.xscale(allResults.maxBy(_.param).param)
           val ymin = stock.yscale(0)
           val ymax = stock.yscale(timeMax)
-          val dots = results map { r =>
-            literal(x = stock.xscale(r.param), y = ymin, param = r.param)
+          val allParams = allResults.map(_.param).distinct
+          val dots = allParams map { p =>
+            literal(x = stock.xscale(p), y = ymin, param = p)
           }
           val vNumDots = 5
           val vDots = (1 to vNumDots) map { c =>
             val time = (timeMin + c * (timeMax - timeMin) / vNumDots).toInt
             literal(x = xmin, y = stock.yscale(time), time = time)
           }
-
-          vue.$set("line", curve.line.path.print)
-          vue.$set("area", curve.area.path.print)
+          vue.$set("curves", stock.curves)
           vue.$set("xmin", xmin)
           vue.$set("xmax", xmax)
           vue.$set("ymin", ymin)
