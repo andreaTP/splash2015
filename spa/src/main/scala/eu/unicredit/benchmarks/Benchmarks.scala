@@ -75,7 +75,7 @@ case class GraphResult(
   color: Color,
   time: Int
 ) {
-  @JSExport def light = string(lighten(color))
+  @JSExport def light = string(color.copy(alpha = 0.6))
   @JSExport def dark = string(color)
 }
 
@@ -158,12 +158,12 @@ class BenchmarkBox(name: String) extends VueActor {
   }
 
   class PageBench(val graph: ActorRef) extends Actor with BenchReceiver {
-    val color = Color(255, 0, 0)
+    val color = Color(158, 199, 247)
     context.actorOf(Props(new BenchActor(name)))
   }
 
   class NodeBench(val graph: ActorRef) extends Actor with BenchReceiver with WSBenchReceiver {
-    val color = Color(0, 255, 0)
+    val color = Color(183, 188, 192)
     val ip = "ws://localhost:9090"
   }
 
@@ -184,11 +184,8 @@ class Benchmark extends VueActor {
           <line v-repeat="vdots" x1="{{xmin}}" y1="{{y}}" x2="{{xmax}}" y2="{{y}}" stroke="#eeeeee" />
 
           <g v-repeat="curves">
-            <text>{{item[0].light()}}</text>
-            <text>{{item[0].dark()}}</text>
-
-            <path d="{{area.path.print()}}" fill="{{item[0].light()}}" stroke="none" />
-            <path d="{{line.path.print()}}" fill="none" stroke="{{item[0].dark()}}" />
+            <path d="{{area.path.print()}}" fill="{{item[0].light}}" stroke="none" />
+            <path d="{{line.path.print()}}" fill="none" stroke="{{item[0].dark}}" />
           </g>
           <g v-repeat="dots" transform="translate({{x}}, {{y}})">
             <circle r="2" x="0" y="0" stroke="#cccccc" fill="white" />
@@ -234,6 +231,8 @@ class Benchmark extends VueActor {
             val time = (timeMin + c * (timeMax - timeMin) / vNumDots).toInt
             literal(x = xmin, y = stock.yscale(time), time = time)
           }
+          import scala.scalajs.js.Dynamic.global
+          global.console.log(stock.curves)
           vue.$set("curves", stock.curves)
           vue.$set("xmin", xmin)
           vue.$set("xmax", xmax)
