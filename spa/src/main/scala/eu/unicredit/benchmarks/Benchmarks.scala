@@ -169,27 +169,26 @@ class BenchmarkBox(name: String) extends VueActor {
 class Benchmark extends VueActor {
   var results = Vector.empty[Result]
 
-  val vueTemplate =
-    """
-    <svg width="600" height="420">
-          <g transform="translate(80, 40)">
-        <line x1="{{xmin - 10}}" y1="{{ymin}}" x2="{{xmax + 10}}" y2="{{ymin}}" stroke="#cccccc" />
-        <line x1="{{xmin}}" y1="{{ymin + 10}}" x2="{{xmin}}" y2="{{ymax - 10}}" stroke="#cccccc" />
-        <line v-repeat="vdots" x1="{{xmin}}" y1="{{y}}" x2="{{xmax}}" y2="{{y}}" stroke="#eeeeee" />
+  val vueTemplate = """
+      <svg width="600" height="420">
+        <g transform="translate(80, 40)">
+          <line x1="{{xmin - 10}}" y1="{{ymin}}" x2="{{xmax + 10}}" y2="{{ymin}}" stroke="#cccccc" />
+          <line x1="{{xmin}}" y1="{{ymin + 10}}" x2="{{xmin}}" y2="{{ymax - 10}}" stroke="#cccccc" />
+          <line v-repeat="vdots" x1="{{xmin}}" y1="{{y}}" x2="{{xmax}}" y2="{{y}}" stroke="#eeeeee" />
 
-              <path d="{{area}}" fill="rgba(120, 129, 194, 0.6)" stroke="none" />
-              <path d="{{line}}" fill="none" stroke="rgb(120, 129, 194)" />
+          <path d="{{area}}" fill="rgba(120, 129, 194, 0.6)" stroke="none" />
+          <path d="{{line}}" fill="none" stroke="rgb(120, 129, 194)" />
 
-        <g v-repeat="dots" transform="translate({{x}}, {{y}})">
-          <circle r="2" x="0" y="0" stroke="#cccccc" fill="white" />
-          <text transform="translate(-3, 15)">{{param}}</text>
-        </g>
-        <g v-repeat="vdots" transform="translate({{x}}, {{y}})">
-          <circle r="2" x="0" y="0" stroke="#cccccc" fill="white" />
-          <text transform="translate(-20, 0)">{{time}}</text>
-        </g>
+          <g v-repeat="dots" transform="translate({{x}}, {{y}})">
+            <circle r="2" x="0" y="0" stroke="#cccccc" fill="white" />
+            <text transform="translate(-3, 15)">{{param}}</text>
           </g>
-    </svg>
+          <g v-repeat="vdots" transform="translate({{x}}, {{y}})">
+            <circle r="2" x="0" y="0" stroke="#cccccc" fill="white" />
+            <text transform="translate(-20, 0)">{{time}}</text>
+          </g>
+        </g>
+      </svg>
     """
 
   def operational =
