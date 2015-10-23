@@ -230,3 +230,4 @@ class Benchmark extends VueActor {
           vue.$set("vdots", vDots.toJSArray)
         }
     }
+}
