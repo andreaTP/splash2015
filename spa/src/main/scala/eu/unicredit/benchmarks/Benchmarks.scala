@@ -42,7 +42,7 @@ case class Result(
 class BenchmarkRunner(title: String) extends VueActor {
   val vueTemplate = s"""
     <div class="row">
-          <h2>$title</h2>
+      <h4>$title</h4>
     </div>
   """
 
@@ -83,11 +83,17 @@ class BenchmarkBox(name: String) extends VueActor {
   println("Starting bbox ")
 
   val vueTemplate = s"""
-    <div>
-      <h2>$name</h2>
-      <button type="button" class="btn btn-primary" v-on='click:startPage("${name}")'>Run in page</button>
-      <button type="button" class="btn btn-primary" v-on='click:startNode("${name}")'>Run on Node</button>
-      <button type="button" class="btn btn-primary" v-on='click:startJvm("${name}")'>Run on Jvm</button>
+    <div class="col-md-12">
+      <div class="row">
+        <h2>$name</h2>
+      </div>
+      <div class="row">
+        <div class="btn-group">
+          <button type="button" class="btn btn-primary" v-on='click:startPage("${name}")'>Run in page</button>
+          <button type="button" class="btn btn-primary" v-on='click:startNode("${name}")'>Run on Node</button>
+          <button type="button" class="btn btn-primary" v-on='click:startJvm("${name}")'>Run on Jvm</button>
+        </div>
+      </div>
     </div>
   """
 
