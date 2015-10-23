@@ -67,9 +67,9 @@ case object StartNode
 case object StartJvm
 
 case class GraphResult(
-  num: Int,
+  param: Int,
   color: String,
-  time: String
+  time: Int
 )
 
 class BenchmarkBox(name: String) extends VueActor {
@@ -117,7 +117,7 @@ class BenchmarkBox(name: String) extends VueActor {
 
     def receive: Receive = {
       case BenchResult(name, time) =>
-        graph ! GraphResult(n, color, time)
+        graph ! GraphResult(n, color, time.toInt)
         n += 1
         println("run and result is "+time)
     }
@@ -167,7 +167,7 @@ class BenchmarkBox(name: String) extends VueActor {
 }
 
 class Benchmark extends VueActor {
-  var results = Vector.empty[Result]
+  var results = Vector.empty[GraphResult]
 
   val vueTemplate = """
       <svg width="600" height="420">
@@ -193,10 +193,10 @@ class Benchmark extends VueActor {
 
   def operational =
     vueBehaviour orElse {
-      case r: Result =>
+      case r: GraphResult =>
         results :+= r
         if (results.length > 1) {
-          val stock = Stock[Result](
+          val stock = Stock[GraphResult](
               data = List(results),
               xaccessor = _.param,
               yaccessor = _.time,
@@ -219,8 +219,9 @@ class Benchmark extends VueActor {
             val time = (timeMin + c * (timeMax - timeMin) / vNumDots).toInt
             literal(x = xmin, y = stock.yscale(time), time = time)
           }
-              vue.$set("line", curve.line.path.print)
-              vue.$set("area", curve.area.path.print)
+
+          vue.$set("line", curve.line.path.print)
+          vue.$set("area", curve.area.path.print)
           vue.$set("xmin", xmin)
           vue.$set("xmax", xmax)
           vue.$set("ymin", ymin)
