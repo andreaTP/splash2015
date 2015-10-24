@@ -36,19 +36,26 @@ object NodeWs {
 	class ConnectionActor(connection: js.Dynamic) extends Actor {
 
     	connection.on("message", (message: js.Dynamic) => {
+            println("on ws received "+message)
+            println("received "+message.utf8Data)
+
             context.parent ! message.utf8Data
     	})
     
     	connection.on("close", (reasonCode: js.Dynamic, description: js.Dynamic) => {
+            println("connection closed...")
         	self ! PoisonPill
     	})
 
     	def receive = {
             case RunBench(name) =>
+                println("has to run benchmarks now!")
                 context.actorOf(Props(new BenchActor(name)))
             case BenchResult(name, time) =>
+                println("result "+name+" -> "+time)
                 connection.send(name+","+time)
     		case msg: String =>
+                println("received string "+msg)
                 connection.send(msg)
     	}
 	}

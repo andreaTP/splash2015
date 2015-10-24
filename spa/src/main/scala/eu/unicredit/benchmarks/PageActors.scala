@@ -10,7 +10,9 @@ class Page extends VueActor {
   import MenuMsg._
 
   val vueTemplate =
-    """<div class="container"><p class="mini-title">My page container and root</p></div>"""
+    """<div class="container">
+      <!--<p class="mini-title">My page container and root</p>-->
+    </div>"""
 
   def operational = {
     val menu = context.actorOf(Props(new Menu()), "menu")
@@ -35,15 +37,16 @@ class Menu extends VueActor {
     """
       <ul class="nav nav-pills">
         <li v-on='click:selectPage(1)' class="{{c1}}"><a href="#">To do</a></li>
-        <li v-on='click:selectPage(2)' class="{{c2}}"><a href="#">Benchmarks</a></li>
-        <li v-on='click:selectPage(3)' class="{{c3}}"><a href="#">Chat</a></li>
+        <li v-on='click:selectPage(2)' class="{{c2}}"><a href="#">Chat</a></li>
+        <li v-on='click:selectPage(3)' class="{{c3}}"><a href="#">Benchmarks</a></li>
+        <li v-on='click:selectPage(4)' class="{{c3}}"><a href="#">Raft</a></li>
       </ul>
     """
 
   override val vueMethods = literal(
     selectPage = (x: Int) => self ! ChangePageAsk(x))
 
-  def operational = select(2)
+  def operational = select(1)
 
   def select(page: Int): Receive = {
     context.parent ! ChangePageApply(page)
@@ -75,9 +78,11 @@ class PageBody extends VueActor {
           case 1 =>
             context.actorOf(Props(new TodoPage()))
           case 2 =>
-            context.actorOf(Props(new BenchmarkPage()))
-          case 3 =>
             context.actorOf(Props(new ChatPage()))
+          case 3 =>
+            context.actorOf(Props(new BenchmarkPage()))
+          case 4 =>
+            context.actorOf(Props(new RaftPage()))
         }
     }
 }

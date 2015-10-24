@@ -4,7 +4,7 @@ package eu.unicredit.benchmarks
 import scala.scalajs.js
 import js.Dynamic.literal
 
-
+import com.typesafe.config.ConfigFactory
 
 import akka.actor._
 

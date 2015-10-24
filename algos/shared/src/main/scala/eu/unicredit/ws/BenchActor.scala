@@ -6,29 +6,31 @@ import eu.unicredit.algos._
 
 case class BenchResult(name: String, time: String)
 
-class BenchActor(name: String) extends Actor {
-
-	val chamParams = Seq(
+object BenchParams {
+	final val chamParams = Seq(
 		(10, 4),
 		(50, 4),
 		(100, 4),
 		(200, 4),
 		(500, 4))
 
-	val pingpongParams = Seq(
+	final val pingpongParams = Seq(
 		(10L),
 		(50L),
 		(100L),
 		(500L),
 		(1000L))
 
-	val pipeParams = Seq(
+	final val pipeParams = Seq(
 		(10L),
 		(50L),
 		(100L),
 		(500L),
-		(1000L))
+		(1000L))	
+}
 
+class BenchActor(name: String) extends Actor {
+	import BenchParams._
 
 	def receive = {
 		name match {
@@ -48,6 +50,7 @@ class BenchActor(name: String) extends Actor {
 					pipeParams
 				)
 			case _ =>
+				println("not valid KILLING")
 				self ! PoisonPill
 				;{case _ => }
 		}

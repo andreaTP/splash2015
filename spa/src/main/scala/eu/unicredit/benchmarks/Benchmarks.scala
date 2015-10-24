@@ -25,13 +25,21 @@ class BenchmarkPage extends VueActor {
             <span class="glyphicon glyphicon-dashboard"></span>
           </small>
         </h1>
+        <ul class="nav nav-pills">
+        	<li v-on='click:doBench("pipe")' class="{{c1}}"><a href="#">Pipe</a></li>
+        	<li v-on='click:doBench("pingpong")' class="{{c2}}"><a href="#">PingPong</a></li>
+        	<li v-on='click:doBench("chameneos")' class="{{c3}}"><a href="#">Chameneos</a></li>
+      	</ul>
       </div>
     """
 
-  def operational = {
-    val bench = context.actorOf(Props(new BenchmarkRunner("Are we fast yet?")), "benchmark")
-    vueBehaviour
-  }
+  override val vueMethods = literal(
+    doBench = (s: String) => {
+    	context.children.foreach(_ ! PoisonPill)
+    	context.actorOf(Props(new BenchmarkRunner(s)))
+    })
+
+  def operational = vueBehaviour
 }
 
 case class Result(
@@ -39,28 +47,18 @@ case class Result(
   time: Double
 )
 
-class BenchmarkRunner(title: String) extends VueActor {
+class BenchmarkRunner(name: String) extends VueActor {
   val vueTemplate = s"""
     <div class="row">
-      <h4>$title</h4>
+      <h4>$name</h4>
     </div>
   """
 
-  implicit val dispatcher = context.dispatcher
-
   def operational =  {
-    //val button = context.actorOf(Props(new RunButton()))
-    val bbox = context.actorOf(Props(new BenchmarkBox("pipe")))
-
+  	context.actorOf(Props(new BenchmarkBox(name)))
+  	
     vueBehaviour orElse {
       case _ =>
-      /*case StartBenchmark =>
-        button ! PoisonPill
-        val graph = context.actorOf(Props(new BenchmarkBox("pipe")))
-        //for (i <- 1 to 15) {
-          //context.system.scheduler.scheduleOnce(i.seconds, graph, Result(i, i * i))
-        //}
-      */
     }
   }
 }
@@ -71,7 +69,7 @@ case object StartJvm
 
 @JSExport
 case class GraphResult(
-  param: Int,
+  param: Long,
   color: Color,
   time: Int
 ) {
@@ -80,12 +78,12 @@ case class GraphResult(
 }
 
 class BenchmarkBox(name: String) extends VueActor {
-  println("Starting bbox ")
+  println("Starting bbox "+name)
 
   val vueTemplate = s"""
     <div class="col-md-12">
       <div class="row">
-        <h2>$name</h2>
+        <h2>Test: $name</h2>
       </div>
       <div class="row">
         <div class="btn-group">
@@ -120,6 +118,19 @@ class BenchmarkBox(name: String) extends VueActor {
     }
   }
 
+  import eu.unicredit.ws.BenchParams
+
+  val params: Seq[Long] = name match {
+  	case "pipe" =>
+  		BenchParams.pipeParams
+  	case "pingpong" =>
+  		BenchParams.pingpongParams
+  	case "chameneos" =>
+  		BenchParams.chamParams.map(_._1.toLong)
+  	case _ =>
+  		Seq[Long]()
+  }
+
   trait BenchReceiver {
     self: Actor =>
     val graph: ActorRef
@@ -130,7 +141,7 @@ class BenchmarkBox(name: String) extends VueActor {
 
     def receive: Receive = {
       case BenchResult(name, time) =>
-        graph ! GraphResult(n, color, time.toInt)
+        graph ! GraphResult(params(n), color, time.toInt)
         n += 1
         println("run and result is "+time)
     }
@@ -154,7 +165,13 @@ class BenchmarkBox(name: String) extends VueActor {
           self ! BenchResult(from, txt)
         }
         ws.onopen = { (event: Event) =>
-        ws.send(s"benchmark,$name")
+        	println(s"connection open benchmark,$name")
+
+        	import scala.concurrent.duration._
+        	import context._
+        	context.system.scheduler.scheduleOnce(500 millis){
+        		ws.send(s"benchmark,$name")
+        	}
       }
     }
 
@@ -237,8 +254,8 @@ class Benchmark extends VueActor {
             val time = (timeMin + c * (timeMax - timeMin) / vNumDots).toInt
             literal(x = xmin, y = stock.yscale(time), time = time)
           }
-          import scala.scalajs.js.Dynamic.global
-          global.console.log(stock.curves)
+          
+          println(stock.curves)
           vue.$set("curves", stock.curves)
           vue.$set("xmin", xmin)
           vue.$set("xmax", xmax)
