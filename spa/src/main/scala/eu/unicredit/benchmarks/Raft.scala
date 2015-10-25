@@ -13,21 +13,29 @@ class RaftPage extends VueActor {
     """
       <div class="col-md-6">
       <h1>
-        Raft Algorithm - TBD
+          Raft Algorithm
+          <small>
+            <span class="glyphicon glyphicon-record"></span>
+          </small>
       </h1>
       <div>
+      	<div class="row">
+      		<ul class="nav nav-pills">
+        		<li v-on='click:startRaft()'><a href="#">Start</a></li>
+      		</ul>
+      	</div>
+      	<div class="row">
        	<div id="RAFT"></div>
-       	
-    	<br/>
-    		<button type="button" v-on='click:startRaft()'>Go!</button>
-    	<span>Chrome only!! If you want to see everything happening, make sure to open the Console as well</span>
-    	</div>
+       	</div>
       </div>
     """
 
   override val vueMethods = literal(
     startRaft = 
-    	() => { js.Dynamic.global.startPlayground(); demo.Main.main() }
+    	() => { 
+    		js.Dynamic.global.startPlayground()
+    		demo.Main.main()
+    	}
     )
 
   def operational = vueBehaviour

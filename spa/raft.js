@@ -43,15 +43,12 @@ function setupCircles(n) {
 }
 
 function startPlayground() {
-	//console.log("ciao")
     SVG = d3.select("#RAFT").append("svg").attr("width", 400).attr("height", 400) 
 	circles = setupCircles(3).map(function(e) { e.state = "follower"; return e })
 	circles.map(function(e) { return drawCircle(SVG, e) })
 }
 
 function drawCircle(to, c) {
-	//console.log(document.getElementById("RAFT"))
-	//console.log("*+****")
   var circle = to.append("circle").attr("cx", c.x).attr("cy", c.y).attr("r", c.r).style("fill", c.color || COLORS[c.state])
   if(typeof c.id !== "undefined") circle = circle.attr("id", 'member' + c.id)
   return circle
