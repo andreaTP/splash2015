@@ -10,7 +10,7 @@ const BASE_CIRCLE = { r: 150, x: 200, y: 200 }
 
 function setText(str) {
   if(!TEXT) {
-  	TEXT = SVG.append('text').attr('x', 110).attr('y', 60).attr('font-size', '30px')
+  	TEXT = SVG.append('text').attr('x', 110).attr('y', 60).attr('font-size', '60px')
   }
   TEXT.text(str.length === 1 ? '0' + str : str);
 }
