@@ -14,41 +14,50 @@ import eu.unicredit.colors._
 
 import paths.high.Stock
 
-class BenchmarkPage extends VueActor {
-
-  val vueTemplate =
-    """
-      <div class="col-md-12">
-        <h1>
-          Benchmarks
-          <small>
-            <span class="glyphicon glyphicon-dashboard"></span>
-          </small>
-        </h1>
-        <ul class="nav nav-pills">
-        	<li v-on='click:doBench("pipe")' class="{{benpipe}}"><a href="#">Pipe</a></li>
-        	<li v-on='click:doBench("pingpong")' class="{{benpingpong}}"><a href="#">PingPong</a></li>
-        	<li v-on='click:doBench("chameneos")' class="{{benchameneos}}"><a href="#">Chameneos</a></li>
-      	</ul>
-      </div>
-    """
+class BenchmarkPage extends VueScalaTagsActor {
+  import scalatags.Text.all._
 
   val opts = Seq("pipe", "pingpong", "chameneos")
 
-  override val vueMethods = literal(
-    doBench = (s: String) => {
-    	for (i <- opts) {
-    		println("s -> "+s+" | i"+i)
-    		if (s == i)
-      			vue.$set(s"ben$i", "disabled")
-      		else
-    			vue.$set(s"ben$i", "")
-    	}
+  def doBench(s: String): Unit = {
+      for (i <- opts) {
+        println("s -> "+s+" | i"+i)
+        if (s == i)
+            vue.$set(s"ben$i", "disabled")
+          else
+          vue.$set(s"ben$i", "")
+      }
 
 
-    	context.children.foreach(_ ! PoisonPill)
-    	context.actorOf(Props(new BenchmarkRunner(s)))
-    })
+      context.children.foreach(_ ! PoisonPill)
+      context.actorOf(Props(new BenchmarkRunner(s)))
+  }
+
+  def stTemplate = div(`class` := "col-md-12")(
+      h1(
+        "Benchmarks ",
+        small(
+          span(`class` := "glyphicon glyphicon-dashboard")()
+        )
+      ),
+      ul(`class` := "nav nav-pills")(
+        li( cls := "{{benpipe}}",
+            on := {() => doBench("pipe")})(
+          a(href := "#")(
+            "Pipe")
+        ),
+        li( cls := "{{benpingpong}}",
+            on := {() => doBench("pingpong")})(
+          a(href := "#")(
+            "PingPong")
+        ),
+        li( cls := "{{benchameneos}}",
+            on := {() => doBench("chameneos")})(
+          a(href := "#")(
+            "Chameneos")
+        )
+      )
+    )
 
   def operational = vueBehaviour
 }
@@ -59,18 +68,13 @@ case class Result(
 )
 
 class BenchmarkRunner(name: String) extends VueActor {
-  val vueTemplate = s"""
-    <div class="row">
-      <!--<h4>$name</h4>-->
-    </div>
-  """
+  val vueTemplate = 
+    """<div class="row"></div>"""
 
   def operational =  {
-  	context.actorOf(Props(new BenchmarkBox(name)))
-  	
-    vueBehaviour orElse {
-      case _ =>
-    }
+    context.actorOf(Props(new BenchmarkBox(name)))
+    
+    vueBehaviour
   }
 }
 
@@ -88,28 +92,27 @@ case class GraphResult(
   @JSExport def dark = string(color)
 }
 
-class BenchmarkBox(name: String) extends VueActor {
-  println("Starting bbox "+name)
+class BenchmarkBox(name: String) extends VueScalaTagsActor {
+  import scalatags.Text.all._
 
-  val vueTemplate = s"""
-    <div class="col-md-12">
-      <!--<div class="row">  
-      </div>-->
-      <div class="row">
-      	<!--<h2>Test: $name</h2>-->
-        <div class="btn-group">
-          <button type="button" class="btn btn-primary" v-on='click:startPage("${name}")'>Run in page</button>
-          <button type="button" class="btn btn-primary" v-on='click:startNode("${name}")'>Run on Node</button>
-          <button type="button" class="btn btn-primary" v-on='click:startJvm("${name}")'>Run on Jvm</button>
-        </div>
-      </div>
-    </div>
-  """
-
-  override val vueMethods = literal(
-    startPage = (n: String) => if (n == name) self ! StartPage,
-    startNode = (n: String) => if (n == name) self ! StartNode,
-    startJvm = (n: String) => if (n == name) self ! StartJvm)
+  def stTemplate = div(cls := "col-md-12")(
+      div( cls := "row")(
+        div( cls := "btn-group")(
+          button( `type` := "button",
+                  cls := "btn btn-primary",
+                  on := {() => self ! StartPage}
+            )("Run in page"),
+          button( `type` := "button",
+                  cls := "btn btn-primary",
+                  on := {() => self ! StartNode}
+            )("Run on Node"),
+          button( `type` := "button",
+                  cls := "btn btn-primary",
+                  on := {() => self ! StartJvm}
+            )("Run on Jvm")
+          )
+        )
+    )
 
   def operational = {
     val graph = context.actorOf(Props(new Benchmark()))
@@ -132,14 +135,14 @@ class BenchmarkBox(name: String) extends VueActor {
   import eu.unicredit.ws.BenchParams
 
   val params: Seq[Long] = name match {
-  	case "pipe" =>
-  		BenchParams.pipeParams
-  	case "pingpong" =>
-  		BenchParams.pingpongParams
-  	case "chameneos" =>
-  		BenchParams.chamParams.map(_._1.toLong)
-  	case _ =>
-  		Seq[Long]()
+    case "pipe" =>
+      BenchParams.pipeParams
+    case "pingpong" =>
+      BenchParams.pingpongParams
+    case "chameneos" =>
+      BenchParams.chamParams.map(_._1.toLong)
+    case _ =>
+      Seq[Long]()
   }
 
   trait BenchReceiver {
@@ -176,13 +179,13 @@ class BenchmarkBox(name: String) extends VueActor {
           self ! BenchResult(from, txt)
         }
         ws.onopen = { (event: Event) =>
-        	println(s"connection open benchmark,$name")
+          println(s"connection open benchmark,$name")
 
-        	import scala.concurrent.duration._
-        	import context._
-        	context.system.scheduler.scheduleOnce(500 millis){
-        		ws.send(s"benchmark,$name")
-        	}
+          import scala.concurrent.duration._
+          import context._
+          context.system.scheduler.scheduleOnce(500 millis){
+            ws.send(s"benchmark,$name")
+          }
       }
     }
 
