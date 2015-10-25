@@ -113,3 +113,29 @@ trait VueActor extends Actor {
 
   def operational(): Receive
 }
+/*
+trait VueScalaTagsActor extends VueActor {
+  import scalatags.Text.all._
+  import scalatags.text._
+
+
+  implicit def registerLambdas: AttrValue[() => Unit] = new AttrValue[() => Unit]{
+    def apply(t: Builder, a: Attr, v: () => Unit) = {
+      import java.util.UUID
+      val uuid = "method"+UUID.randomUUID().toString.replace("-","")
+
+      vueMethods.updateDynamic(
+      uuid)(v)
+
+      t.setAttr(a.name, "click:"+uuid+"()")
+    }
+  }
+
+  def on = "v-on".attr
+
+  def stTemplate: Tag
+
+  val vueTemplate = stTemplate.render
+
+}
+*/
