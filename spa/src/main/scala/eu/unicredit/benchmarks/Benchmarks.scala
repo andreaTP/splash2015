@@ -26,15 +26,26 @@ class BenchmarkPage extends VueActor {
           </small>
         </h1>
         <ul class="nav nav-pills">
-        	<li v-on='click:doBench("pipe")' class="{{c1}}"><a href="#">Pipe</a></li>
-        	<li v-on='click:doBench("pingpong")' class="{{c2}}"><a href="#">PingPong</a></li>
-        	<li v-on='click:doBench("chameneos")' class="{{c3}}"><a href="#">Chameneos</a></li>
+        	<li v-on='click:doBench("pipe")' class="{{benpipe}}"><a href="#">Pipe</a></li>
+        	<li v-on='click:doBench("pingpong")' class="{{benpingpong}}"><a href="#">PingPong</a></li>
+        	<li v-on='click:doBench("chameneos")' class="{{benchameneos}}"><a href="#">Chameneos</a></li>
       	</ul>
       </div>
     """
 
+  val opts = Seq("pipe", "pingpong", "chameneos")
+
   override val vueMethods = literal(
     doBench = (s: String) => {
+    	for (i <- opts) {
+    		println("s -> "+s+" | i"+i)
+    		if (s == i)
+      			vue.$set(s"ben$i", "disabled")
+      		else
+    			vue.$set(s"ben$i", "")
+    	}
+
+
     	context.children.foreach(_ ! PoisonPill)
     	context.actorOf(Props(new BenchmarkRunner(s)))
     })
@@ -50,7 +61,7 @@ case class Result(
 class BenchmarkRunner(name: String) extends VueActor {
   val vueTemplate = s"""
     <div class="row">
-      <h4>$name</h4>
+      <!--<h4>$name</h4>-->
     </div>
   """
 
@@ -82,10 +93,10 @@ class BenchmarkBox(name: String) extends VueActor {
 
   val vueTemplate = s"""
     <div class="col-md-12">
+      <!--<div class="row">  
+      </div>-->
       <div class="row">
-        <h2>Test: $name</h2>
-      </div>
-      <div class="row">
+      	<!--<h2>Test: $name</h2>-->
         <div class="btn-group">
           <button type="button" class="btn btn-primary" v-on='click:startPage("${name}")'>Run in page</button>
           <button type="button" class="btn btn-primary" v-on='click:startNode("${name}")'>Run on Node</button>

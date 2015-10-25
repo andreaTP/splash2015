@@ -10,8 +10,20 @@ class Page extends VueActor {
   import MenuMsg._
 
   val vueTemplate =
-    """<div class="container">
-      <!--<p class="mini-title">My page container and root</p>-->
+    """
+    <div>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">
+            <img alt="Brand" style="max-height: 30px;"src="./logo.png">
+          </a>
+        </div>
+      </div>
+    </nav>
+    <!--<div class="container">
+      <p class="mini-title">My page container and root</p>
+    </div>-->
     </div>"""
 
   def operational = {
@@ -39,7 +51,7 @@ class Menu extends VueActor {
         <li v-on='click:selectPage(1)' class="{{c1}}"><a href="#">To do</a></li>
         <li v-on='click:selectPage(2)' class="{{c2}}"><a href="#">Chat</a></li>
         <li v-on='click:selectPage(3)' class="{{c3}}"><a href="#">Benchmarks</a></li>
-        <li v-on='click:selectPage(4)' class="{{c3}}"><a href="#">Raft</a></li>
+        <li v-on='click:selectPage(4)' class="{{c4}}"><a href="#">Raft</a></li>
       </ul>
     """
 
@@ -51,7 +63,7 @@ class Menu extends VueActor {
   def select(page: Int): Receive = {
     context.parent ! ChangePageApply(page)
 
-    for (i <- 1 to 3) {
+    for (i <- 1 to 4) {
       vue.$set(s"c$i", "")
     }
 
@@ -68,7 +80,10 @@ class PageBody extends VueActor {
   import MenuMsg._
 
   val vueTemplate =
-    """<div class="row"><hr /></div>"""
+    """
+    <div class="container" style="padding-top: 0px;">
+      <!--<div class="row"><hr /></div>-->
+    </div>"""
 
   def operational =
     vueBehaviour orElse {

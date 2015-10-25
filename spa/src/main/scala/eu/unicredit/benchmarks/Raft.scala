@@ -15,9 +15,20 @@ class RaftPage extends VueActor {
       <h1>
         Raft Algorithm - TBD
       </h1>
-      <iframe http-url='http://localhost:8000/raft/index.html' />
+      <div>
+       	<div id="RAFT"></div>
+       	<script src="./raft.js"></script>
+    	<br/>
+    		<button type="button" v-on='click:startRaft()'>Go!</button>
+    	<span>Chrome only!! If you want to see everything happening, make sure to open the Console as well</span>
+    	</div>
       </div>
     """
+
+  override val vueMethods = literal(
+    startRaft = 
+    	() => println("has to start the raft algo")
+    )
 
   def operational = vueBehaviour
 
