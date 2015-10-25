@@ -62,7 +62,7 @@ trait VueActor extends Actor {
   me =>
   import VueActor._
 
-  val vueTemplate: String
+  def vueTemplate: String
 
   val vueMethods: js.Dynamic = literal()
 
@@ -82,11 +82,11 @@ trait VueActor extends Actor {
       sender ! VueChildAdded
   }
 
-   lazy val vueName = self.path.name.replace("$","")
+  lazy val vueName = self.path.name.replace("$","")
 
-   var vue: Vue = null
+  var vue: Vue = null
 
-  val vueProto: () => Vue = () =>
+  lazy val vueProto: () => Vue = () =>
     Vue.component(vueName, Vue.extend(
     literal(
       ready= (((thisVue: Vue) => {
@@ -113,7 +113,7 @@ trait VueActor extends Actor {
 
   def operational(): Receive
 }
-/*
+
 trait VueScalaTagsActor extends VueActor {
   import scalatags.Text.all._
   import scalatags.text._
@@ -131,11 +131,27 @@ trait VueScalaTagsActor extends VueActor {
     }
   }
 
+  implicit def registerLambdasWithStrings: AttrValue[(String, () => Unit, Seq[String])] = new AttrValue[(String, () => Unit, Seq[String])]{
+    def apply(t: Builder, a: Attr, v: (String, () => Unit, Seq[String])) = {
+      import java.util.UUID
+      val uuid = "method"+UUID.randomUUID().toString.replace("-","")
+
+      vueMethods.updateDynamic(
+      uuid)(v._2)
+
+      val values = 
+        if (v._3.isEmpty) ""
+        else " | "+v._3.mkString(" | ")
+
+      t.setAttr(a.name, v._1+":"+uuid+"()"+values)
+    }
+  }
+
+
   def on = "v-on".attr
 
   def stTemplate: Tag
 
-  val vueTemplate = stTemplate.render
+  def vueTemplate = stTemplate.render
 
 }
-*/

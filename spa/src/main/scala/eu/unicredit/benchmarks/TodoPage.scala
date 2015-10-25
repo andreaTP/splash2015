@@ -10,37 +10,38 @@ object TodoMsgs {
   case class AddItem(txt: String)
 }
 
-class TodoPage extends VueActor {
+class TodoPage extends VueScalaTagsActor {
   import TodoMsgs._
+  import scalatags.Text.all._
 
-  val vueTemplate =
-    """
-      <div class="col-md-6">
-      <h1>
-        To do
-        <small>
-          <span class="glyphicon glyphicon-th-list"></span>
-        </small>
-      </h1>
-      <div class="input-group">
-        <span class="input-group-addon">
-          <span class="glyphicon glyphicon-pushpin"></span>
-        </span>
-        <input type="text" class="form-control" placeholder="what do you want to do?" v-model="newtodo" v-on="keyup:submitTodo | key 'enter'"/>
-      </div>
-      </br>
-      <label>Your list:</label>
-      </div>
-    """
-
-  override val vueMethods = literal(
-    submitTodo = () => {
+  def submitTodo() = {
       val str = vue.$get("newtodo").toString
       if (str != "") {
         self ! AddItem(str)
       }
       vue.$set("newtodo", "")
-    })
+  }
+
+  def stTemplate = div(`class` := "col-md-6")(
+      h1(
+        "To Do ",
+        small(
+          span(`class` := "glyphicon glyphicon-th-list")()
+        )
+      ),
+      div(`class` := "input-group")(
+        span(`class` := "input-group-addon")(
+          span(`class` := "glyphicon glyphicon-pushpin")()
+        ),
+        input(`type` := "text", 
+              `class` := "form-control", 
+              "placeholder".attr := "what do you want to do?",
+              "v-model".attr := "newtodo",
+              on := ("keyup", () => submitTodo, Seq("key 'enter'")))
+        ),
+      br()(),
+      label("Your list:")
+    )
 
   def operational = {
     val tde = context.actorOf(Props(new TodoElements()))
@@ -66,19 +67,18 @@ class TodoPage extends VueActor {
       }
   }
 
-  class TodoElement(txt: String) extends VueActor {
+  class TodoElement(txt: String) extends VueScalaTagsActor {
     import TodoMsgs._
+    import scalatags.Text.all._
 
-    val vueTemplate =
-      s"""<li class="list-group-item">
-        $txt
-        <span class="glyphicon glyphicon-remove clickable right" v-on='click:removeItem'></span>
-      </li>"""
-
-    override val vueMethods = literal(
-    removeItem = () => {
+    def removeItem() =
       self ! PoisonPill
-    })
+
+    def stTemplate = li(`class` := "list-group-item")(
+      s"$txt",
+      span(`class` := "glyphicon glyphicon-remove clickable right",
+          on := {() => removeItem})
+      )
 
     def operational = vueBehaviour
   }
