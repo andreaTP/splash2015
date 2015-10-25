@@ -46,26 +46,27 @@ class ChatPage extends VueActor {
     vueBehaviour orElse {case any => }
   }
 
-  class NameInput extends VueActor {
-    val vueTemplate =
-      """
-        <div class="input-group">
-          <span class="input-group-addon">
-            <span class="glyphicon glyphicon-user"></span>
-          </span>
-          <input type="text" class="form-control" placeholder="what is your name?" v-model="name" v-on="keyup:nameChoosen | key 'enter'"/>
-        </div>
-      """
+  class NameInput extends VueScalaTagsActor {
+  	import scalatags.Text.all._
 
-    override val vueMethods = literal(
-      nameChoosen = () => {
-        val str = vue.$get("name").toString
-        context.parent ! StartChat(str)
-      })
+  	def nameChoosen() = {
+      val str = vue.$get("name").toString
+	  context.parent ! StartChat(str)
+  	}
 
-    def operational = {
-      vueBehaviour orElse {case any =>}
-    }
+  	def stTemplate = 
+    div(cls := "input-group")(
+      span(`class` := "input-group-addon")(
+      	span(`class` := "glyphicon glyphicon-user")()
+      ),
+      input(`type` := "text", 
+        `class` := "form-control", 
+        "placeholder".attr := "what is your name?",
+        "v-model".attr := "name",
+        on := ("keyup", () => nameChoosen, Seq("key 'enter'")))
+    )
+
+    def operational = vueBehaviour
   }
 
   class NameChoosen(name: String) extends VueActor {
@@ -144,26 +145,27 @@ class ChatPage extends VueActor {
     }
   }
 
-  class MsgInput(name: String) extends VueActor {
-    val vueTemplate =
-      """
-        <div class="input-group">
-          <span class="input-group-addon">
-            <span class="glyphicon glyphicon-pencil"></span>
-          </span>
-          <input type="text" class="form-control" placeholder="what are you thinking?" v-model="msg" v-on="keyup:sendMsg | key 'enter'"/>
-        </div>
-      """
+  class MsgInput(name: String) extends VueScalaTagsActor {
+  	import scalatags.Text.all._
 
-    override val vueMethods = literal(
-      sendMsg = () => {
-        val str = vue.$get("msg").toString
-        context.parent ! SendChatMsg(name, str)
-        vue.$set("msg", "")
-      })
+  	def stTemplate = 
+      div(`class` := "input-group")(
+        span(`class` := "input-group-addon")(
+      	  span(`class` := "glyphicon glyphicon-pencil")()
+        ),
+        input(`type` := "text", 
+          `class` := "form-control", 
+          "placeholder".attr := "what are you thinking?",
+          "v-model".attr := "msg",
+          on := ("keyup", () => sendMsg, Seq("key 'enter'")))
+      )
 
-    def operational = {
-      vueBehaviour orElse {case any => }
+	def sendMsg() = {
+      val str = vue.$get("msg").toString
+      context.parent ! SendChatMsg(name, str)
+      vue.$set("msg", "")
     }
+
+    def operational = vueBehaviour
   }
 }
