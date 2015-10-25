@@ -1,12 +1,17 @@
 'use strict';
 
 const SERVERS = 3
-const SVG = d3.select("#RAFT").append("svg").attr("width", 400).attr("height", 400) 
+
+var SVG;
+var circles;
+var TEXT;
+
 const BASE_CIRCLE = { r: 150, x: 200, y: 200 }
 
-var TEXT = SVG.append('text').attr('x', 110).attr('y', 60).attr('font-size', '30px')
-
 function setText(str) {
+  if(!TEXT) {
+  	TEXT = SVG.append('text').attr('x', 110).attr('y', 60).attr('font-size', '30px')
+  }
   TEXT.text(str.length === 1 ? '0' + str : str);
 }
 
@@ -37,10 +42,16 @@ function setupCircles(n) {
   return ret
 }
 
+function startPlayground() {
+	//console.log("ciao")
+    SVG = d3.select("#RAFT").append("svg").attr("width", 400).attr("height", 400) 
+	circles = setupCircles(3).map(function(e) { e.state = "follower"; return e })
+	circles.map(function(e) { return drawCircle(SVG, e) })
+}
 
 function drawCircle(to, c) {
-	console.log(to)
-	console.log("*+****++++")
+	//console.log(document.getElementById("RAFT"))
+	//console.log("*+****")
   var circle = to.append("circle").attr("cx", c.x).attr("cy", c.y).attr("r", c.r).style("fill", c.color || COLORS[c.state])
   if(typeof c.id !== "undefined") circle = circle.attr("id", 'member' + c.id)
   return circle
@@ -81,8 +92,8 @@ function transitionHeartBeat(from) {
   }
 }
 
-var circles = setupCircles(3).map(function(e) { e.state = "follower"; return e })
-circles.map(function(e) { return drawCircle(SVG, e) })
+/*var circles = setupCircles(3).map(function(e) { e.state = "follower"; return e })
+circles.map(function(e) { return drawCircle(SVG, e) })*/
 
 function setState(id, what) {
   if(what === 'leader') LEADER = id

@@ -17,7 +17,7 @@ class RaftPage extends VueActor {
       </h1>
       <div>
        	<div id="RAFT"></div>
-       	<script src="./raft.js"></script>
+       	
     	<br/>
     		<button type="button" v-on='click:startRaft()'>Go!</button>
     	<span>Chrome only!! If you want to see everything happening, make sure to open the Console as well</span>
@@ -27,7 +27,7 @@ class RaftPage extends VueActor {
 
   override val vueMethods = literal(
     startRaft = 
-    	() => println("has to start the raft algo")
+    	() => { js.Dynamic.global.startPlayground(); demo.Main.main() }
     )
 
   def operational = vueBehaviour
